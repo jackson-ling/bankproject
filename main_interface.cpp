@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "config_interface.h" // 作用：进入配置界面，调用相应的功能
 #include "service.h"          // 业务的暂停，恢复，办结，统计功能（基于窗口 / 业务类型）
+#include "get_number.h"
+#include "queue.h"
 
 void clear_main()
 {
@@ -41,6 +43,11 @@ int main()
     sqlist service_list;
     sqlist_init(&service_list); // 初始化业务信息列表
 
+    queue q;
+    queue_init(&q);
+
+    linklist l;
+    init_list(&l);
     while (1)
     {
         printf("\n请输入命令号：");
@@ -57,7 +64,7 @@ int main()
         switch (choice)
         {
         case '1':
-            printf("您选择了：取号排队\n");
+            // find_least_queue_window_from_file();
             break;
         case '2':
             printf("您选择了：办结离队\n");

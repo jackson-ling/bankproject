@@ -11,7 +11,9 @@
 
 typedef struct lnode
 {
-    char data[max_length]; // 使用字符数组存储窗口信息
+    char data[max_length]; // 使用字符数组存储窗口信息（名称）
+    int person_num;        // 记录排队的人数
+    char status[10];       // 记录窗口状态（如 "开放" 或 "关闭"）
     struct lnode *next;
 } lnode, *linklist;
 
@@ -51,14 +53,21 @@ int load_from_file(linklist l)
     while (!feof(file))
     {
         lnode *new_node = (lnode *)malloc(sizeof(lnode));
-        if (fscanf(file, "%s", new_node->data) == 1)
+        if (fscanf(file, "%[^,], %d, %s", new_node->data, &new_node->person_num, new_node->status) == 3) // 读取 "窗口名称, 排队人数, 状态"
         {
             new_node->next = NULL;
             p->next = new_node;
-            p = new_node;
+            p = new_node; // 更新指针p，指向新节点
         }
     }
     fclose(file);
+
+    // 如果文件为空，链表也应该为空
+    if (l->next == NULL)
+    {
+        printf("文件为空，未加载任何窗口信息。\n");
+    }
+
     return ok;
 }
 
@@ -75,7 +84,7 @@ int save_to_file(linklist l)
     lnode *p = l->next; // 跳过头节点
     while (p)
     {
-        fprintf(file, "%s\n", p->data);
+        fprintf(file, "%s, %d, %s\n", p->data, p->person_num, p->status); // 按格式保存窗口信息、排队人数和状态
         p = p->next;
     }
     fclose(file);
@@ -101,10 +110,14 @@ int insert_window_info(linklist l)
         return error;
     }
 
-    // 用户输入的字符串
+    getchar();
+    // 用户输入的窗口名称
     printf("请输入需要新增的窗口信息：");
     scanf(" %s", s->data); // 注意空格清除输入缓冲区
+    getchar();             // 清除输入缓冲区中的换行符，避免输出格式出现问题
 
+    s->person_num = 0;         // 初始化排队人数为 0
+    strcpy(s->status, "开放"); // 初始化窗口状态为 "开放"
     s->next = NULL;
     p->next = s; // 将新节点链接到链表末尾
 
@@ -117,6 +130,7 @@ int delete_num(linklist l)
 {
     int i;
     find_elem(l); // 显示所有窗口信息
+    getchar();
     printf("请输入需要删除的窗口序号：");
     scanf("%d", &i);
 
@@ -149,6 +163,7 @@ int modify_info(linklist l)
 {
     int i;
     find_elem(l);
+    getchar();
     printf("请输入需要修改的窗口序号：");
     scanf("%d", &i);
 
@@ -168,7 +183,7 @@ int modify_info(linklist l)
     }
 
     printf("请输入修改信息：");
-    scanf(" %s", p->data); // 清除输入缓冲区后读取
+    scanf(" %s", p->data); // 清除输入缓冲区后读取窗口名称
 
     save_to_file(l); // 保存到文件
     return ok;
@@ -189,7 +204,7 @@ int find_elem(linklist l)
     printf("\n---------------窗口信息如下---------------\n");
     while (p)
     {
-        printf("%d.%s\n", j, p->data);
+        printf("%d. %s, 排队人数：%d, 状态：%s\n", j, p->data, p->person_num, p->status); // 显示窗口名称、排队人数和状态
         p = p->next;
         j++;
     }
