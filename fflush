@@ -1,0 +1,22 @@
+// 清理缓冲区中的换行符
+    getchar(); // 会影响配置层while函数的scanf读取，如果不清理会直接读取换行符导致程序结束
+
+    // 使用 fgets 读取一行字符串，允许空格
+    // if (fgets(input, sizeof(input), stdin) == NULL)
+    // {
+    //     printf("输入失败！\n");
+    //     free(s);      // 如果输入失败，释放已分配的内存
+    //     return error; // 返回错误
+    // }
+
+    // // fgets 会保留换行符，需要去掉换行符
+    // input[strcspn(input, "\n")] = 0;
+
+    // // 为新节点的 data 分配内存，并将输入字符串复制到 data 中
+    // s->data = (char *)malloc(strlen(input) + 1);
+    // if (!s->data) // 检查内存分配是否成功
+    // {
+    //     printf("内存分配失败\n");
+    //     free(s); // 释放节点内存
+    //     return error;
+    // }
