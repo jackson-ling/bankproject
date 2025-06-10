@@ -53,11 +53,17 @@ int load_from_file(linklist l)
     while (!feof(file))
     {
         lnode *new_node = (lnode *)malloc(sizeof(lnode));
-        if (fscanf(file, "%[^,], %d, %s", new_node->data, &new_node->person_num, new_node->status) == 3) // 读取 "窗口名称, 排队人数, 状态"
+        if (fscanf(file, " %[^,], %d, %s", new_node->data, &new_node->person_num, new_node->status) == 3) // 读取 "窗口名称, 排队人数, 状态"
         {
             new_node->next = NULL;
             p->next = new_node;
             p = new_node; // 更新指针p，指向新节点
+        }
+        else
+        {
+            // 文件格式错误时，跳过该行
+            char buffer[100];
+            fgets(buffer, sizeof(buffer), file); // 读取并丢弃当前行
         }
     }
     fclose(file);
@@ -110,7 +116,6 @@ int insert_window_info(linklist l)
         return error;
     }
 
-    getchar();
     // 用户输入的窗口名称
     printf("请输入需要新增的窗口信息：");
     scanf(" %s", s->data); // 注意空格清除输入缓冲区
@@ -133,6 +138,7 @@ int delete_num(linklist l)
     getchar();
     printf("请输入需要删除的窗口序号：");
     scanf("%d", &i);
+    getchar();
 
     lnode *p = l;
     int j = 0;
@@ -201,10 +207,11 @@ int find_elem(linklist l)
         return error;
     }
 
+    getchar(); // 清理缓冲区中的换行符
     printf("\n---------------窗口信息如下---------------\n");
     while (p)
     {
-        printf("%d. %s, 排队人数：%d, 状态：%s\n", j, p->data, p->person_num, p->status); // 显示窗口名称、排队人数和状态
+        printf("%d. %s, 排队人数：%d, 状态：%s\n", j, p->data, p->person_num, p->status);
         p = p->next;
         j++;
     }

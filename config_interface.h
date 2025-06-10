@@ -48,6 +48,9 @@ void clear()
 
 int config_interface()
 {
+    // 清理缓冲区，确保没有残留的换行符
+    while (getchar() != '\n')
+        ;
     printf("\n\n-----------配置管理界面-----------\n\n");
     printf("命令号\t功能\n");
     printf("1\t业务新增\n");
