@@ -43,8 +43,8 @@ int main()
     sqlist service_list;
     sqlist_init(&service_list); // 初始化业务信息列表
 
-    queue q;
-    queue_init(&q);
+    // queue q;
+    // queue_init(&q);
 
     linklist l;
     init_list(&l);
@@ -64,7 +64,8 @@ int main()
         switch (choice)
         {
         case '1':
-            // find_least_queue_window_from_file();
+            min_number_window();
+            get_num();
             break;
         case '2':
             printf("您选择了：办结离队\n");

@@ -219,4 +219,56 @@ int find_elem(linklist l)
     return ok;
 }
 
+// 查找排队人数最少的窗口并显示信息
+void min_number_window()
+{
+    linklist l;
+    init_list(&l); // 从文件加载窗口信息
+
+    lnode *least_queue_window = NULL;
+    int least_queue_num = INT_MAX; // 初始化为最大值，确保能找到最小的排队人数
+
+    lnode *p = l->next; // 跳过头节点
+    while (p)
+    {
+        if (p->person_num < least_queue_num)
+        {
+            least_queue_num = p->person_num;
+            least_queue_window = p; // 记录排队人数最少的窗口
+        }
+        p = p->next;
+    }
+
+    if (least_queue_window)
+    {
+        // 显示最少排队人数窗口的信息
+        printf("\n请到<%s>排队\t排队人数%d\t窗口状态：%s\t", least_queue_window->data, least_queue_window->person_num, least_queue_window->status);
+    }
+    else
+    {
+        printf("文件中没有有效的窗口信息\n");
+    }
+}
+
+lnode *get_min_num_window()
+{
+    linklist l;
+    init_list(&l); // 从文件加载窗口信息
+
+    lnode *least_queue_window = NULL;
+    int least_queue_num = INT_MAX; // 初始化为最大值，确保能找到最小的排队人数
+
+    lnode *p = l->next; // 跳过头节点
+    while (p)
+    {
+        if (p->person_num < least_queue_num)
+        {
+            least_queue_num = p->person_num;
+            least_queue_window = p; // 记录排队人数最少的窗口
+        }
+        p = p->next;
+    }
+    return least_queue_window; // 返回指向最少排队窗口的指针
+}
+
 #endif
