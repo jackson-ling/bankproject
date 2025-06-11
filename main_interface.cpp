@@ -90,11 +90,12 @@ int main()
 
             printf("请输入排队编号: ");
             int queue_number;
-            scanf("%d", &queue_number);
+            char window_char;
+            scanf("%c%d", &window_char, &queue_number);
             while (getchar() != '\n')
                 ; // 清空输入缓冲区
 
-            finish(&q, service_type, queue_number); // 传递排队编号给 finish 函数
+            finish(&q, service_type, window_char, queue_number); // 传递排队编号给 finish 函数
             break;
         case '3':
             pause_service(&service_list); // 调用业务暂停功能

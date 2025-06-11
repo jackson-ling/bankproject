@@ -12,10 +12,11 @@
 static int current_number = 1; // 记录当前分配的号码
 
 // 函数声明
-void get_num(queue *q, const char *service_type);            // 分配号码并提示排队
-void finish(queue *q, char *service_type, int queue_number); // 结束业务并提示
-void pause_service();                                        // 暂停服务
-void resume_service();                                       // 恢复服务
+void get_num(queue *q, const char *service_type); // 分配号码并提示排队
+void finish(queue *q, char *service_type, char window_char, int queue_number);
+
+void pause_service();  // 暂停服务
+void resume_service(); // 恢复服务
 // 队列辅助函数
 int is_queue_empty(queue *q); // 检查队列是否为空
 int peek(queue *q);           // 获取队列中下一个元素，但不移除
@@ -60,7 +61,7 @@ void get_num(queue *q, const char *service_type)
 }
 
 // 结束业务并计算办理时间
-void finish(queue *q, char *service_type, int queue_number)
+void finish(queue *q, char *service_type, char window_char, int queue_number)
 {
     // 调用 stop_service_timer 函数结束计时并更新文件
     stop_service_timer(service_type);
@@ -91,7 +92,7 @@ void finish(queue *q, char *service_type, int queue_number)
         const char *window_name = window_names[window_index];
 
         // 提示用户下一个人的信息
-        printf("请 %d 到 %s 办理 %s 业务。\n", next_queue_number, window_name, service_type);
+        printf("请 %c%d 到 %s 办理 %s 业务。\n", window_char, next_queue_number, window_name, service_type);
     }
     else
     {
