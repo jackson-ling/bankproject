@@ -33,11 +33,11 @@ int queue_init(queue *q)
 }
 
 // 获取队列长度
-void get_queue_size(queue *q)
+int get_queue_size(queue *q)
 {
     int length;
     length = ((q->rear - q->front + maxsize) % maxsize);
-    printf("队列长度为%d\n", length);
+    return length;
 }
 
 // 入队
@@ -54,16 +54,15 @@ int enqueue(queue *q, elemtype e)
 }
 
 // 出队
-int dequeue(queue *q, elemtype *e)
+int dequeue(queue *q)
 {
     if (q->front == q->rear)
     {
         printf("队列为空，无法出队\n");
         return error;
     }
-
-    *e = q->base[q->front];
-    printf("出队元素为：%d", *e);
+    // 队列用来保存排队人数，无需输出信息，出队后，把对应位置的值置为0即可
+    q->base[q->front] = 0;
     q->front = (q->front + 1) % maxsize;
     return ok;
 }

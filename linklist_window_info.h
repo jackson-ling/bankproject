@@ -1,5 +1,5 @@
-#ifndef WINDOW_INFO_H
-#define WINDOW_INFO_H
+#ifndef LINKLIST_WINDOW_INFO_H
+#define LINKLIST_WINDOW_INFO_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +24,11 @@ int modify_info(linklist l);
 int find_elem(linklist l);
 int load_from_file(linklist l);
 int save_to_file(linklist l);
+lnode *get_min_num_window();
+void min_number_window();
+int init_list(linklist *l);
+void update_window_num();
+void subtract_window_num();
 
 // 初始化
 int init_list(linklist *l)
@@ -219,37 +224,7 @@ int find_elem(linklist l)
     return ok;
 }
 
-// 查找排队人数最少的窗口并显示信息
-void min_number_window()
-{
-    linklist l;
-    init_list(&l); // 从文件加载窗口信息
-
-    lnode *least_queue_window = NULL;
-    int least_queue_num = INT_MAX; // 初始化为最大值，确保能找到最小的排队人数
-
-    lnode *p = l->next; // 跳过头节点
-    while (p)
-    {
-        if (p->person_num < least_queue_num)
-        {
-            least_queue_num = p->person_num;
-            least_queue_window = p; // 记录排队人数最少的窗口
-        }
-        p = p->next;
-    }
-
-    if (least_queue_window)
-    {
-        // 显示最少排队人数窗口的信息
-        printf("\n请到<%s>排队\t排队人数%d\t窗口状态：%s\t", least_queue_window->data, least_queue_window->person_num, least_queue_window->status);
-    }
-    else
-    {
-        printf("文件中没有有效的窗口信息\n");
-    }
-}
-
+// 分配号码功能的实现：找到人数最少的窗口分配，返回指向节点的指针
 lnode *get_min_num_window()
 {
     linklist l;
@@ -261,7 +236,7 @@ lnode *get_min_num_window()
     lnode *p = l->next; // 跳过头节点
     while (p)
     {
-        if (p->person_num < least_queue_num)
+        if (strcmp(p->status, "开放") == 0 && p->person_num < least_queue_num) // 排队的窗口应该是开放的
         {
             least_queue_num = p->person_num;
             least_queue_window = p; // 记录排队人数最少的窗口
@@ -269,6 +244,122 @@ lnode *get_min_num_window()
         p = p->next;
     }
     return least_queue_window; // 返回指向最少排队窗口的指针
+}
+
+// 查找排队人数最少的窗口并提示用户到哪个窗口排队信息（使用文件操作）,显示排队人数使用的是队列的属性
+void min_number_window()
+{
+    // 调用查找人数最少窗口的函数（使用文件操作）
+    lnode *least_queue_window = get_min_num_window();
+
+    // 提示信息
+    if (least_queue_window)
+    {
+        if (least_queue_window->person_num == 0)
+        {
+            // 如果排队人数为0，直接显示办理业务
+            printf("\t请到<%s>办理业务\t", least_queue_window->data);
+        }
+        else
+        {
+            // 如果排队人数不为0，显示排队人数的相关信息
+            printf("\t请到<%s>排队\t排队人数：%d\t", least_queue_window->data, least_queue_window->person_num);
+        }
+    }
+    else
+    {
+        printf("文件中没有有效的窗口信息\n");
+    }
+}
+
+// 更新文件中窗口的人数
+void update_window_num()
+{
+    linklist l;
+    init_list(&l); // 从文件加载窗口信息
+
+    lnode *least_queue_window = NULL;
+    int least_queue_num = INT_MAX; // 初始化为最大值，确保能找到最小的排队人数
+
+    lnode *p = l->next; // 跳过头节点
+    while (p)
+    {
+        if (strcmp(p->status, "开放") == 0 && p->person_num < least_queue_num)
+        {
+            least_queue_num = p->person_num;
+            least_queue_window = p; // 记录排队人数最少的窗口
+        }
+        p = p->next;
+    }
+
+    // 如果找到了最少排队的窗口
+    if (least_queue_window != NULL)
+    {
+        least_queue_window->person_num++; // 增加排队人数
+
+        // 重新保存更新后的数据到文件
+        FILE *file = fopen(FILE_PATH, "w");
+        if (!file)
+        {
+            printf("无法打开文件\n");
+            return; // 文件打开失败时直接返回
+        }
+
+        // 将更新后的链表数据保存到文件
+        p = l->next; // 跳过头节点
+        while (p)
+        {
+            fprintf(file, "%s, %d, %s\n", p->data, p->person_num, p->status); // 保存窗口信息、排队人数和状态
+            p = p->next;
+        }
+
+        fclose(file); // 关闭文件
+    }
+}
+
+// 用户离队，更新窗口中的人数
+void subtract_window_num()
+{
+    linklist l;
+    init_list(&l); // 从文件加载窗口信息
+
+    lnode *least_queue_window = NULL;
+    int least_queue_num = INT_MAX; // 初始化为最大值，确保能找到最小的排队人数
+
+    lnode *p = l->next; // 跳过头节点
+    while (p)
+    {
+        if (strcmp(p->status, "开放") == 0 && p->person_num < least_queue_num)
+        {
+            least_queue_num = p->person_num;
+            least_queue_window = p; // 记录排队人数最少的窗口
+        }
+        p = p->next;
+    }
+
+    // 如果找到了最少排队的窗口
+    if (least_queue_window != NULL)
+    {
+        least_queue_window->person_num--; // 增加排队人数
+
+        // 重新保存更新后的数据到文件
+        FILE *file = fopen(FILE_PATH, "w");
+        if (!file)
+        {
+            printf("无法打开文件\n");
+            return; // 文件打开失败时直接返回
+        }
+
+        // 将更新后的链表数据保存到文件
+        p = l->next; // 跳过头节点
+        while (p)
+        {
+            fprintf(file, "%s, %d, %s\n", p->data, p->person_num, p->status); // 保存窗口信息、排队人数和状态
+            p = p->next;
+        }
+
+        fclose(file); // 关闭文件
+    }
 }
 
 #endif

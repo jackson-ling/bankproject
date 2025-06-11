@@ -25,7 +25,6 @@ typedef struct
     Business elem[maxsize]; // 使用数组存储业务信息
     int length;             // 当前业务数
 } sqlist;
-
 // 函数声明
 int sqlist_init(sqlist *l);
 int insert_num(sqlist *l);
@@ -140,7 +139,7 @@ int load_from_file(sqlist *l)
         return error;
     }
 
-    l->length = 0; // 重置长度
+    l->length = 0;
     while (fscanf(file, "%s %s", l->elem[l->length].service, l->elem[l->length].status) == 2)
     {
         l->length++;
