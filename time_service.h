@@ -26,6 +26,7 @@ typedef struct
     char service_type[100];          // 业务类型名称
     ServiceTime times[MAX_SERVICES]; // 对应业务类型的所有办理时间
     int count;                       // 当前业务类型的办理次数
+    char window_name[100];           // 新增窗口名称字段
 } ServiceRecord;
 
 ServiceRecord service_records[MAX_SERVICES]; // 存储所有业务类型的记录
@@ -49,7 +50,9 @@ void print_service_times(const char *service_type, char window_char, int queue_n
 void print_all_service_times();
 
 // 统计文件中的不同业务类型的平均办理时间
-void calculate_average_times_from_file();
+void calculate_average_times_service();
+
+void calculate_average_times_window();
 
 // 找到对应的业务类型记录
 ServiceRecord *find_service_record(const char *service_type)
@@ -223,7 +226,7 @@ void print_all_service_times()
 }
 
 // 统计文件中的不同业务类型的平均办理时间
-void calculate_average_times_from_file()
+void calculate_average_times_service()
 {
     FILE *file = fopen(FILE_PATH, "r");
     if (file == NULL)
@@ -242,17 +245,18 @@ void calculate_average_times_from_file()
         service_records[i].count = 0;
     }
 
+    // 逐行读取文件并解析内容
     while (fgets(line, sizeof(line), file))
     {
         char service_type[100];
+        char window_name[20];
         char queue_number[20];
-        int count;
         double duration;
 
-        // 解析文件中的每一行，获取业务类型、排队编号、次数和办理时间
-        if (sscanf(line, "%s\t%s\t办理次数: %d\t办理时间: %lf秒", service_type, queue_number, &count, &duration) == 4)
+        // 解析每一行数据
+        if (sscanf(line, "%s\t%s\t%s\t办理时间: %lf秒", service_type, window_name, queue_number, &duration) == 4)
         {
-            // 检查该业务类型是否已经存在
+            // 查找是否已经存在该业务类型
             int found = 0;
             for (int i = 0; i < service_count; i++)
             {
@@ -265,7 +269,7 @@ void calculate_average_times_from_file()
                 }
             }
 
-            // 如果没有找到该业务类型，则新建一条记录
+            // 如果该业务类型不存在，创建新记录
             if (!found)
             {
                 strcpy(service_records[service_count].service_type, service_type);
@@ -276,7 +280,8 @@ void calculate_average_times_from_file()
         }
     }
 
-    // 处理完所有行后，计算并打印每个业务类型的平均办理时间
+    // 计算每个业务类型的平均办理时间
+    double average_times[MAX_SERVICES];
     for (int i = 0; i < service_count; i++)
     {
         double total_time = 0.0;
@@ -284,9 +289,128 @@ void calculate_average_times_from_file()
         {
             total_time += service_records[i].times[j].duration;
         }
-        double average_time = total_time / service_records[i].count;
-        printf("业务类型: %s\t办理次数: %d\t平均办理时间: %.2f秒\n",
-               service_records[i].service_type, service_records[i].count, average_time);
+        average_times[i] = total_time / service_records[i].count;
+    }
+
+    // 按平均办理时间从小到大排序
+    for (int i = 0; i < service_count - 1; i++)
+    {
+        for (int j = i + 1; j < service_count; j++)
+        {
+            if (average_times[i] > average_times[j])
+            {
+                // 交换平均办理时间
+                double temp = average_times[i];
+                average_times[i] = average_times[j];
+                average_times[j] = temp;
+
+                // 交换对应的业务类型记录
+                ServiceRecord temp_record = service_records[i];
+                service_records[i] = service_records[j];
+                service_records[j] = temp_record;
+            }
+        }
+    }
+
+    // 打印按平均办理时间排序后的业务类型
+    for (int i = 0; i < service_count; i++)
+    {
+        printf("%s: %.2f秒\n", service_records[i].service_type, average_times[i]);
+    }
+
+    fclose(file);
+}
+
+void calculate_average_times_window()
+{
+    FILE *file = fopen(FILE_PATH, "r");
+    if (file == NULL)
+    {
+        printf("无法打开文件: %s\n", FILE_PATH);
+        return;
+    }
+
+    char line[256];
+    ServiceRecord window_records[MAX_SERVICES]; // 用于存储每个窗口的记录
+    int window_count = 0;
+
+    // 初始化窗口记录数组
+    for (int i = 0; i < MAX_SERVICES; i++)
+    {
+        window_records[i].count = 0;
+    }
+
+    // 逐行读取文件并解析内容
+    while (fgets(line, sizeof(line), file))
+    {
+        char service_type[100];
+        char window_name[20];
+        char queue_number[20];
+        double duration;
+
+        // 解析每一行数据
+        if (sscanf(line, "%s\t%s\t%s\t办理时间: %lf秒", service_type, window_name, queue_number, &duration) == 4)
+        {
+            // 查找是否已经存在该窗口
+            int found = 0;
+            for (int i = 0; i < window_count; i++)
+            {
+                if (strcmp(window_records[i].window_name, window_name) == 0)
+                {
+                    window_records[i].times[window_records[i].count].duration = duration;
+                    window_records[i].count++;
+                    found = 1;
+                    break;
+                }
+            }
+
+            // 如果该窗口不存在，创建新记录
+            if (!found)
+            {
+                strcpy(window_records[window_count].window_name, window_name);
+                window_records[window_count].times[0].duration = duration;
+                window_records[window_count].count = 1;
+                window_count++;
+            }
+        }
+    }
+
+    // 计算每个窗口的平均办理时间
+    double average_times[MAX_SERVICES];
+    for (int i = 0; i < window_count; i++)
+    {
+        double total_time = 0.0;
+        for (int j = 0; j < window_records[i].count; j++)
+        {
+            total_time += window_records[i].times[j].duration;
+        }
+        average_times[i] = total_time / window_records[i].count;
+    }
+
+    // 按平均办理时间从小到大排序
+    for (int i = 0; i < window_count - 1; i++)
+    {
+        for (int j = i + 1; j < window_count; j++)
+        {
+            if (average_times[i] > average_times[j])
+            {
+                // 交换平均办理时间
+                double temp = average_times[i];
+                average_times[i] = average_times[j];
+                average_times[j] = temp;
+
+                // 交换对应的窗口记录
+                ServiceRecord temp_record = window_records[i];
+                window_records[i] = window_records[j];
+                window_records[j] = temp_record;
+            }
+        }
+    }
+
+    // 打印按窗口排序后的平均办理时间
+    for (int i = 0; i < window_count; i++)
+    {
+        printf("%s, 平均办理时间: %.2f秒\n", window_records[i].window_name, average_times[i]);
     }
 
     fclose(file);

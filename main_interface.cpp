@@ -5,6 +5,7 @@
 #include "service_user.h";
 #include "sqlist_service.h"
 #include "time_service.h"
+#include "linklist_window_info.h"
 void clear_main()
 {
     system("cls");
@@ -50,9 +51,13 @@ int main()
     linklist l;
     init_list(&l);
 
+    // 窗口信息功能部分
+    lnode *link_list;      // 链表的定义
+    init_list(&link_list); // 初始化链表
+
     char service_type[100]; // 存储办理的业务类型，用于记录办理时间
 
-    int show_info_called = 0;
+    int show_info_called = 0; // 用于只显示一次业务查询结果
 
     while (1)
     {
@@ -70,6 +75,7 @@ int main()
         switch (choice)
         {
         case '1':
+
             if (!show_info_called)
             {
                 show_service_info(&service_list);
@@ -86,7 +92,6 @@ int main()
             printf("\n请输入需要结束的业务类型: ");
             scanf("%s", service_type);
             getchar();
-
             printf("请输入排队编号: ");
             int queue_number;
             char window_char;
@@ -105,8 +110,8 @@ int main()
         case '5':
             char choice_stat;
             printf("-----------可查询的内容如下-----------\n");
-            printf("1.基于业务类型的统计（平均排队时间 -- 平均业务办理时间）\n");
-            printf("2.基于窗口的统计（平均排队时间 -- 平均业务办理时间）\n");
+            printf("1.基于业务类型的统计\n");
+            printf("2.基于窗口的统计\n");
 
             while (1)
             {
@@ -128,13 +133,12 @@ int main()
 
                 if (choice_stat == '1')
                 {
-                    printf("\n-----------part 1 : 平均业务办理时间如下-----------\n");
-                    calculate_average_times_from_file();
-                    printf("\n--------------part 2 : 平均排队时间如下--------------\n");
+
+                    calculate_average_times_service();
                 }
                 else if (choice_stat == '2')
                 {
-                    printf("\n您选择了：基于窗口的统计\n\n");
+                    calculate_average_times_window();
                 }
                 else
                 {
@@ -143,7 +147,7 @@ int main()
             }
             break;
         case '6':
-            printf("您选择了：进度查询\n");
+            find_elem(link_list);
             break;
         case '7':
             config_interface();

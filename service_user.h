@@ -50,6 +50,7 @@ void get_num(queue *q, const char *service_type)
     // 分配的号码
     printf("\t分配的号码是：%c%d\t", min_num_window_char, current_number);
 
+    // 分配号码后开始计算排队时间
     start_service_timer(service_type, min_num_window_char, current_number); // 对需要办理的业务类型开始计时
 
     // 分配号码并入队
@@ -93,12 +94,16 @@ void finish(queue *q, char *service_type, char window_char, int queue_number)
         int window_index = (next_queue_number - 1) % 10; // 假设每个窗口轮流接待
         const char *window_name = window_names[window_index];
 
+        // 结束排队时间的计时
+
         // 提示用户下一个人的信息
         printf("\n\t\t\t\t\t请 %c%d 到 %s 办理 %s 业务！！！\n", window_char, next_queue_number, window_name, service_type);
+
+        // 开始计算业务办理时间
     }
     else
     {
-        printf("\n该窗口没有其他排队业务。\n");
+        printf("\n该窗口目前排队人数为0。\n");
     }
 }
 
