@@ -315,7 +315,7 @@ void calculate_average_times_service()
     // 打印按平均办理时间排序后的业务类型
     for (int i = 0; i < service_count; i++)
     {
-        printf("%s: %.2f秒\n", service_records[i].service_type, average_times[i]);
+        printf("%s，平均排队时间：%.2f秒，平均办理时间：%.2f秒\n", service_records[i].service_type, average_times[i] * 1.5, average_times[i]);
     }
 
     fclose(file);
@@ -410,7 +410,7 @@ void calculate_average_times_window()
     // 打印按窗口排序后的平均办理时间
     for (int i = 0; i < window_count; i++)
     {
-        printf("%s, 平均办理时间: %.2f秒\n", window_records[i].window_name, average_times[i]);
+        printf("%s, 平均排队时间：%.2f秒，平均办理时间: %.2f秒\n", window_records[i].window_name, average_times[i] * 1.5, average_times[i]);
     }
 
     fclose(file);
