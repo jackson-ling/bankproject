@@ -94,7 +94,7 @@ void finish(queue *q, char *service_type, char window_char, int queue_number)
         const char *window_name = window_names[window_index];
 
         // 提示用户下一个人的信息
-        printf("请 %c%d 到 %s 办理 %s 业务。\n", window_char, next_queue_number, window_name, service_type);
+        printf("\n\t\t\t\t\t请 %c%d 到 %s 办理 %s 业务！！！\n", window_char, next_queue_number, window_name, service_type);
     }
     else
     {

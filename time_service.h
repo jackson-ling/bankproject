@@ -99,10 +99,22 @@ void start_service_timer(const char *service_type, char window_char, int queue_n
 
     // 获取当前时间并记录
     time_t current_time = time(NULL);
-    record->times[record->count].start_time = current_time;              // 获取当前时间戳
-    strcpy(record->times[record->count].queue_number, queue_number_str); // 保存排队编号
-    record->times[record->count].window_char = window_char;              // 保存窗口编号
-    record->times[record->count].queue_id = queue_number;                // 保存排队编号
+
+    // 确保不覆盖已有的记录，使用 queue_number 确定唯一计时器
+    for (int i = 0; i < record->count; i++)
+    {
+        if (strcmp(record->times[i].queue_number, queue_number_str) == 0)
+        {
+            // 如果该编号已经存在，则返回
+            return;
+        }
+    }
+
+    // 将新的计时器记录到结构体中
+    strcpy(record->times[record->count].queue_number, queue_number_str);
+    record->times[record->count].window_char = window_char;
+    record->times[record->count].queue_id = queue_number;
+    record->times[record->count].start_time = current_time;
 
     // 使用 strftime 格式化时间为 "时:分:秒"
     struct tm *start_tm = localtime(&current_time);
@@ -110,6 +122,8 @@ void start_service_timer(const char *service_type, char window_char, int queue_n
     strftime(start_time_str, sizeof(start_time_str), "%H:%M:%S", start_tm);
 
     printf("    类型: %s\t开始时间: %s\n", service_type, start_time_str);
+    printf("------------------------------------------------------------------------------------------------------------------------\n");
+    record->count++; // 增加计时器记录数
 }
 
 // 记录业务的结束时间并计算持续时间（不打印任何信息）
@@ -122,27 +136,37 @@ void stop_service_timer(const char *service_type, char window_char, int queue_nu
         char queue_number_str[20];
         sprintf(queue_number_str, "%c%d", window_char, queue_number); // 格式化为 "窗口字符+排队编号"
 
-        // 获取当前结束时间
-        time_t current_time = time(NULL);
-        record->times[record->count].end_time = current_time;
-
-        // 计算开始时间和结束时间的差值
-        record->times[record->count].duration = difftime(record->times[record->count].end_time, record->times[record->count].start_time);
-
-        // 保存到文件中，修改写入格式
-        FILE *file = fopen(FILE_PATH, "a");
-        if (file != NULL)
+        // 查找对应的排队编号的计时器
+        for (int i = 0; i < record->count; i++)
         {
-            const char *window_name = get_window_name(window_char); // 获取窗口名称
-            fprintf(file, "%s\t%s\t%s\t办理时间: %.2f秒\n",
-                    record->service_type,
-                    window_name,                            // 使用窗口名称替代字符
-                    queue_number_str,                       // 排队编号
-                    record->times[record->count].duration); // 办理时间
-            fclose(file);
+            if (strcmp(record->times[i].queue_number, queue_number_str) == 0)
+            {
+                // 找到该排队编号的计时器
+                time_t current_time = time(NULL);
+                record->times[i].end_time = current_time;
+
+                // 计算开始时间和结束时间的差值
+                record->times[i].duration = difftime(record->times[i].end_time, record->times[i].start_time);
+
+                // 保存到文件中，修改写入格式
+                FILE *file = fopen(FILE_PATH, "a");
+                if (file != NULL)
+                {
+                    const char *window_name = get_window_name(window_char); // 获取窗口名称
+                    fprintf(file, "%s\t%s\t%s\t办理时间: %.2f秒\n",
+                            record->service_type,
+                            window_name,                // 使用窗口名称替代字符
+                            queue_number_str,           // 排队编号
+                            record->times[i].duration); // 办理时间
+                    fclose(file);
+                }
+
+                return; // 成功处理后退出
+            }
         }
 
-        record->count++; // 记录该业务类型办理次数
+        // 如果没有找到该排队编号，打印错误信息
+        printf("未找到对应的排队编号: %s\n", queue_number_str);
     }
 }
 
@@ -171,6 +195,7 @@ void print_service_times(const char *service_type, char window_char, int queue_n
                        record->times[i].queue_number,
                        record->times[i].duration,
                        end_time_str);
+                printf("------------------------------------------------------------------------------------------------------------------------\n");
             }
         }
     }

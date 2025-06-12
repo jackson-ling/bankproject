@@ -83,7 +83,7 @@ int main()
             break;
         case '2':
 
-            printf("请输入需要结束的业务类型: ");
+            printf("\n请输入需要结束的业务类型: ");
             scanf("%s", service_type);
             getchar();
 
