@@ -78,9 +78,8 @@ int main()
             printf("\n请输入需要办理的业务类型: ");
             scanf("%s", service_type); // 输入字符串入字符串
             getchar();
-            start_service_timer(service_type); // 对需要办理的业务类型开始计时
-            min_number_window();               // 找到一个人数最少的窗口办理，并提示用户到哪排队
-            get_num(&q, service_type);         // 给用户分配排队号码
+            min_number_window();       // 找到一个人数最少的窗口办理，并提示用户到哪排队
+            get_num(&q, service_type); // 给用户分配排队号码
             break;
         case '2':
 

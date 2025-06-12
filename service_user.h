@@ -48,7 +48,9 @@ void get_num(queue *q, const char *service_type)
     }
 
     // 分配的号码
-    printf("\t分配的号码是：%c%d\n", min_num_window_char, current_number);
+    printf("\t分配的号码是：%c%d\t", min_num_window_char, current_number);
+
+    start_service_timer(service_type, min_num_window_char, current_number); // 对需要办理的业务类型开始计时
 
     // 分配号码并入队
     enqueue(q, current_number);
@@ -63,11 +65,11 @@ void get_num(queue *q, const char *service_type)
 // 结束业务并计算办理时间
 void finish(queue *q, char *service_type, char window_char, int queue_number)
 {
-    // 调用 stop_service_timer 函数结束计时并更新文件
-    stop_service_timer(service_type);
+    // 同一个窗口可以有多个编号，为了实现独立计时，传入编号来区分
+    stop_service_timer(service_type, window_char, queue_number);
 
     // 打印该业务类型的办理时间
-    print_service_times(service_type);
+    print_service_times(service_type, window_char, queue_number);
 
     // 队列操作
     dequeue(q);       // 从队列中取出一个业务编号

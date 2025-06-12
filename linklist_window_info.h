@@ -258,12 +258,12 @@ void min_number_window()
         if (least_queue_window->person_num == 0)
         {
             // 如果排队人数为0，直接显示办理业务
-            printf("\t请到<%s>办理业务\t", least_queue_window->data);
+            printf("\n请到<%s>办理业务\t", least_queue_window->data);
         }
         else
         {
             // 如果排队人数不为0，显示排队人数的相关信息
-            printf("\t请到<%s>排队\t排队人数：%d\t", least_queue_window->data, least_queue_window->person_num);
+            printf("\n请到<%s>排队\t排队人数：%d\t", least_queue_window->data, least_queue_window->person_num);
         }
     }
     else
